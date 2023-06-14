@@ -1,6 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-
 namespace RNCryptor
 {
     public enum EncryptionMode
@@ -23,13 +25,12 @@ namespace RNCryptor
         public const int Iterations = 10000;
         protected FormatVersion VersionValue = FormatVersion.V3;
         protected EncryptionMode ModeValue = EncryptionMode.Key;
-        protected byte[]? EncryptionKeyValue;
-        protected byte[]? HMACKeyValue;
+        protected byte[] EncryptionKeyValue;
+        protected byte[] HMACKeyValue;
         protected string PasswordValue = string.Empty;
-        protected byte[]? EncryptionSaltValue;
-        protected byte[]? HMACSaltValue;
-        protected byte[]? IVValue;
-
+        protected byte[] EncryptionSaltValue;
+        protected byte[] HMACSaltValue;
+        protected byte[] IVValue;
         public virtual FormatVersion Version
         {
             get => VersionValue;
@@ -39,7 +40,6 @@ namespace RNCryptor
                 VersionValue = value;
             }
         }
-
         public virtual EncryptionMode Mode
         {
             get => ModeValue;
@@ -54,10 +54,13 @@ namespace RNCryptor
                 ModeValue = value;
             }
         }
-
         public virtual byte[] EncryptionKey
         {
-            get => (byte[])(EncryptionKeyValue ??= Utils.GenerateRandom(KeySize)).Clone();
+            get
+            {
+                if (EncryptionKeyValue == null) GenerateEncryptionKey();
+                return (byte[])EncryptionKeyValue.Clone();
+            }
             set
             {
                 if (value.Length != KeySize) throw new CryptographicException();
@@ -67,7 +70,11 @@ namespace RNCryptor
         }
         public virtual byte[] HMACKey
         {
-            get => (byte[])(HMACKeyValue ??= Utils.GenerateRandom(KeySize)).Clone();
+            get
+            {
+                if (HMACKeyValue == null) GenerateHMACKey();
+                return (byte[])HMACKeyValue.Clone();
+            }
             set
             {
                 if (value.Length != KeySize) throw new CryptographicException();
@@ -77,14 +84,17 @@ namespace RNCryptor
         }
         public virtual byte[] IV
         {
-            get => (byte[])(IVValue ??= Utils.GenerateRandom(IVSize)).Clone();
+            get
+            {
+                if (IVValue == null) GenerateIV();
+                return (byte[])IVValue.Clone();
+            }
             set
             {
                 if (value.Length != IVSize) throw new CryptographicException();
                 IVValue = value;
             }
         }
-
         public virtual string Password
         {
             get => PasswordValue;
@@ -98,7 +108,11 @@ namespace RNCryptor
         }
         public virtual byte[] EncryptionSalt
         {
-            get => (byte[])(EncryptionSaltValue ??= Utils.GenerateRandom(SaltSize)).Clone();
+            get
+            {
+                if (EncryptionSaltValue == null) GenerateEncryptionSalt();
+                return (byte[])EncryptionSaltValue.Clone();
+            }
             set
             {
                 if (value.Length != SaltSize) throw new CryptographicException();
@@ -108,7 +122,11 @@ namespace RNCryptor
         }
         public virtual byte[] HMACSalt
         {
-            get => (byte[])(HMACSaltValue ??= Utils.GenerateRandom(SaltSize)).Clone();
+            get
+            {
+                if (HMACSaltValue == null) GenerateHMACSalt();
+                return (byte[])HMACSaltValue.Clone();
+            }
             set
             {
                 if (value.Length != SaltSize) throw new CryptographicException();
@@ -116,31 +134,30 @@ namespace RNCryptor
                 HMACSaltValue = value;
             }
         }
-
         public void GenerateEncryptionKey() => EncryptionKeyValue = Utils.GenerateRandom(KeySize);
         public void GenerateHMACKey() => HMACKeyValue = Utils.GenerateRandom(KeySize);
         public void GenerateEncryptionSalt() => EncryptionSaltValue = Utils.GenerateRandom(SaltSize);
         public void GenerateHMACSalt() => HMACSaltValue = Utils.GenerateRandom(SaltSize);
         public void GenerateIV() => IVValue = Utils.GenerateRandom(IVSize);
-
-        protected void DeriveKeys(string? password = null, byte[]? encryptionSalt = null, byte[]? hmacSalt = null)
+        protected void DeriveKeys(string password = null, byte[] encryptionSalt = null, byte[] hmacSalt = null)
         {
-            password ??= Password;
-            encryptionSalt ??= EncryptionSalt;
-            hmacSalt ??= HMACSalt;
+            if (password == null) password = Password;
+            if (encryptionSalt == null) encryptionSalt = EncryptionSalt;
+            if (hmacSalt == null) hmacSalt = HMACSalt;
             byte[] passwordBuffer = Encoding.Default.GetBytes(password);
             if (VersionValue <= FormatVersion.V2)
             {
                 int passwordCharCount = password.Length;
-                passwordBuffer = passwordBuffer[..passwordCharCount];
+                passwordBuffer = passwordBuffer.Take(passwordCharCount).ToArray();
             }
-            EncryptionKeyValue = Rfc2898DeriveBytes.Pbkdf2(passwordBuffer, encryptionSalt, Iterations, HashAlgorithmName.SHA1, KeySize);
-            HMACKeyValue = Rfc2898DeriveBytes.Pbkdf2(passwordBuffer, hmacSalt, Iterations, HashAlgorithmName.SHA1, KeySize);
+            Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes(passwordBuffer, encryptionSalt, Iterations);
+            Rfc2898DeriveBytes k2 = new Rfc2898DeriveBytes(passwordBuffer, hmacSalt, Iterations);
+            EncryptionKeyValue = k1.GetBytes(KeySize);
+            HMACKeyValue = k2.GetBytes(KeySize);
         }
-
         public virtual ICryptoTransform CreateEncryptor()
         {
-            List<byte[]> headers = new() {
+            List<byte[]> headers = new List<byte[]>() {
                 new byte[] { (byte)VersionValue, (byte)(VersionValue >= FormatVersion.V1 ? ModeValue : 0) }
             };
             if (ModeValue == EncryptionMode.Password)
@@ -156,120 +173,36 @@ namespace RNCryptor
         {
             throw new NotImplementedException();
         }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
             if (EncryptionKeyValue != null)
             {
-                Array.Clear(EncryptionKeyValue);
+                Array.Clear(EncryptionKeyValue, 0, EncryptionKeyValue.Length);
                 EncryptionKeyValue = null;
             }
             if (HMACKeyValue != null)
             {
-                Array.Clear(HMACKeyValue);
+                Array.Clear(HMACKeyValue, 0, HMACKeyValue.Length);
                 EncryptionKeyValue = null;
             }
             if (PasswordValue != string.Empty) PasswordValue = string.Empty;
             if (EncryptionSaltValue != null)
             {
-                Array.Clear(EncryptionSaltValue);
+                Array.Clear(EncryptionSaltValue, 0, EncryptionSaltValue.Length);
                 EncryptionSaltValue = null;
             }
             if (HMACSaltValue != null)
             {
-                Array.Clear(HMACSaltValue);
+                Array.Clear(HMACSaltValue, 0, HMACSaltValue.Length);
                 EncryptionKeyValue = null;
             }
             if (IVValue != null)
             {
-                Array.Clear(IVValue);
+                Array.Clear(IVValue, 0, IVValue.Length);
                 EncryptionKeyValue = null;
             }
         }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-    }
-    internal class Encryptor : ICryptoTransform
-    {
-        private const int HMACSize = 32;
-        private readonly ICryptoTransform _cipher;
-        private readonly HMACSHA256 _hmac;
-        private byte[]? _header;
-
-        public Encryptor(byte[] encryptionKey, byte[] hmacKey, byte[] iv, FormatVersion version, byte[] header)
-        {
-            _header = header;
-            using (Aes aes = Aes.Create())
-            {
-                aes.Mode = CipherMode.CBC;
-                aes.Key = encryptionKey;
-                aes.IV = iv;
-                _cipher = aes.CreateEncryptor();
-            }
-            _hmac = new HMACSHA256(hmacKey);
-            if (version >= FormatVersion.V2) _hmac.TransformBlock(_header, 0, _header.Length, _header, 0);
-        }
-
-        public bool CanReuseTransform => _cipher.CanReuseTransform;
-
-        public bool CanTransformMultipleBlocks => _header == null && _cipher.CanTransformMultipleBlocks;
-
-        public int InputBlockSize => _cipher.InputBlockSize;
-
-        public int OutputBlockSize => (_header?.Length ?? 0) + _cipher.OutputBlockSize;
-
-        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
-        {
-            byte[] ciphertext = new byte[inputCount];
-            _cipher.TransformBlock(inputBuffer, inputOffset, inputCount, ciphertext, 0);
-            byte[] result = Handle(ciphertext);
-            Array.Copy(result, 0, outputBuffer, outputOffset, result.Length);
-            return result.Length;
-        }
-
-        public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
-        {
-            byte[] ciphertext = _cipher.TransformFinalBlock(inputBuffer, inputOffset, inputCount);
-            List<byte[]> buffers = new() { Handle(ciphertext) };
-            byte[] hmac = new byte[HMACSize];
-            _hmac.ComputeHash(new byte[0]).CopyTo(hmac, 0);
-            buffers.Add(hmac);
-            byte[] outputBuffer = Utils.Concaternate(buffers);
-            return outputBuffer;
-        }
-
-        private byte[] Handle(byte[] inputBuffer)
-        {
-            List<byte[]> buffers = new();
-            if (_header != null)
-            {
-                buffers.Add(_header);
-                _header = null;
-            }
-            buffers.Add(inputBuffer);
-            byte[] outputBuffer = Utils.Concaternate(buffers);
-            _hmac.TransformBlock(inputBuffer, 0, inputBuffer.Length, inputBuffer, 0);
-            return outputBuffer;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing) return;
-            _cipher.Dispose();
-            _hmac.Dispose();
-            if (_header != null)
-            {
-                Array.Clear(_header);
-                _header = null;
-            }
-        }
-
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

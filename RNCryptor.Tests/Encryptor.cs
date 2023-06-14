@@ -1,32 +1,35 @@
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-
-namespace RNCryptor.Tests;
-
-[TestClass]
-public class Encryptor
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+namespace RNCryptor.Tests
 {
-    [TestMethod]
-    public void PasswordBasedEncryption()
+    [TestClass]
+    public class Encryptor
     {
-        foreach (PasswordVector vector in Vectors.Password)
+        [TestMethod]
+        public void PasswordBasedEncryption()
         {
-            Cryptor cryptor = new()
+            foreach (PasswordVector vector in Vectors.Password)
             {
-                Version = vector.Version,
-                Password = vector.Password,
-                EncryptionSalt = vector.EncryptionSalt,
-                HMACSalt = vector.HMACSalt,
-                IV = vector.IV,
-            };
-            using MemoryStream outputStream = new();
-            using (CryptoStream cryptoStream = new(outputStream, cryptor.CreateEncryptor(), CryptoStreamMode.Write))
-            {
-                using MemoryStream inputStream = new(vector.Plaintext, false);
-                inputStream.CopyTo(cryptoStream);
+                Cryptor cryptor = new Cryptor()
+                {
+                    Version = vector.Version,
+                    Password = vector.Password,
+                    EncryptionSalt = vector.EncryptionSalt,
+                    HMACSalt = vector.HMACSalt,
+                    IV = vector.IV,
+                };
+                using (MemoryStream outputStream = new MemoryStream())
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream(outputStream, cryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cryptoStream.Write(vector.Plaintext, 0, vector.Plaintext.Length);
+                    }
+                    byte[] ciphertext = outputStream.ToArray();
+                    Assert.IsTrue(ciphertext.SequenceEqual(vector.Ciphertext));
+                }
             }
-            byte[] ciphertext = outputStream.ToArray();
-            Assert.IsTrue(ciphertext.SequenceEqual(vector.Ciphertext));
         }
     }
 }

@@ -1,16 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
-using System.Xml.Schema;
-
 namespace RNCryptor
 {
     internal class Utils
     {
-        private static volatile RandomNumberGenerator? _rng;
+        private static volatile RandomNumberGenerator _rng;
         internal static RandomNumberGenerator RandomNumberGenerator
         {
             get
             {
-                _rng ??= RandomNumberGenerator.Create();
+                if (_rng == null) _rng = RandomNumberGenerator.Create();
                 return _rng;
             }
         }

@@ -1,107 +1,201 @@
-namespace RNCryptor.Tests;
-
-internal class Vectors
+using System;
+namespace RNCryptor.Tests
 {
-    public static readonly PasswordVector[] Password = new PasswordVector[] {
+    internal class Vectors
+    {
+        public static readonly KdfVector[] Kdf = new KdfVector[] {
+        new KdfVector(
+            title: "One byte",
+            version: FormatVersion.V3,
+            password: "a",
+            salt: Convert.FromBase64String("AQIDBAUGBwg="),
+            key: Convert.FromBase64String("/GMrDKayPv+ancPg5YUWf1oyiRbtGfg1WL47qYKHl80=")
+        ),
+        new KdfVector(
+            title: "Short password",
+            version: FormatVersion.V3,
+            password: "thepassword",
+            salt: Convert.FromBase64String("AgMEBQYHCAE="),
+            key: Convert.FromBase64String("DqhPUlIxDcPjp2B8M7/R61gIBftoKTAF2iEDfM9JliY=")
+        ),
+        new KdfVector(
+            title: "Passphrase",
+            version: FormatVersion.V3,
+            password: "this is a bit longer password",
+            salt: Convert.FromBase64String("AwQFBgcIAQI="),
+            key: Convert.FromBase64String("cTQ6yx6WdbAWrGXc/l3awuV+2cNVZf27LdbSzv4mPVs=")
+        ),
+        new KdfVector(
+            title: "Long passphrase",
+            version: FormatVersion.V3,
+            password: "$$$it was the epoch of belief, it was the epoch of incredulity; it was the season of Light, it was the season of Darkness; it was the spring of hope, it was the winter of despair; we had everything before us, we had nothing before us; we were all going directly to Heaven, we were all going the other way.",
+            salt: Convert.FromBase64String("BAUGBwgBAgM="),
+            key: Convert.FromBase64String("EbUsUMv0W+amNqMUK4wwuFpiRIFKfUPjdFfzjeRsZzU=")
+        ),
+        new KdfVector(
+            title: "Multibyte",
+            version: FormatVersion.V3,
+            password: "中文密码",
+            salt: Convert.FromBase64String("BQYHCAECAwQ="),
+            key: Convert.FromBase64String("0vwyN9SmlmjKg9lpws2hrGw2hHkrZkSxqQsgUgByFd0=")
+        ),
+        new KdfVector(
+            title: "Mixed language",
+            version: FormatVersion.V3,
+            password: "中文密码 with a little English, too.",
+            salt: Convert.FromBase64String("BgcIAQIDBAU="),
+            key: Convert.FromBase64String("Rr2l9GWYKkdAxyi8FMXeXMf8TurwqkG7m56ElUUtr/8=")
+        ),
+    };
+        public static readonly PasswordVector[] Password = new PasswordVector[] {
         new PasswordVector(
-            Title: "Multi-block",
-            Version: FormatVersion.V2,
-            Password: "password",
-            EncryptionSalt: Convert.FromHexString("97076DC661B6E0CE"),
-            HMACSalt: Convert.FromHexString("9DA3BB43D95BCD45"),
-            IV: Convert.FromHexString("EE396D39E342FFDB679B270DCD9C557C"),
-            Plaintext: Convert.FromHexString("546869732069732061206C6F6E676572207465737420766563746F7220696E74656E64656420746F206265206C6F6E676572207468616E206F6E6520626C6F636B2E"),
-            Ciphertext: Convert.FromHexString("020197076DC661B6E0CE9DA3BB43D95BCD45EE396D39E342FFDB679B270DCD9C557C37055FFFCC1B663B1E6B8C5694DBB96D97A3AC0FA3F355DB6668C5A8A2A06F10056CE92384A618A35BF0FA9EB612B0B4FA72F749F76E2F728C16574DC2F15B7CEC1786D291C2135F932DDC5A34D9EAFD6B45F99491AC23C34299AF0BE68A43E6E8113BB748FBC19BCAD638EA79B07309")
+            title: "Multi-block",
+            version: FormatVersion.V2,
+            password: "password",
+            encryptionSalt: Convert.FromBase64String("lwdtxmG24M4="),
+            hmacSalt: Convert.FromBase64String("naO7Q9lbzUU="),
+            iv: Convert.FromBase64String("7jltOeNC/9tnmycNzZxVfA=="),
+            plaintext: Convert.FromBase64String("VGhpcyBpcyBhIGxvbmdlciB0ZXN0IHZlY3RvciBpbnRlbmRlZCB0byBiZSBsb25nZXIgdGhhbiBvbmUgYmxvY2su"),
+            ciphertext: Convert.FromBase64String("AgGXB23GYbbgzp2ju0PZW81F7jltOeNC/9tnmycNzZxVfDcFX//MG2Y7HmuMVpTbuW2Xo6wPo/NV22ZoxaiioG8QBWzpI4SmGKNb8PqethKwtPpy90n3bi9yjBZXTcLxW3zsF4bSkcITX5Mt3Fo02er9a0X5lJGsI8NCma8L5opD5ugRO7dI+8GbytY46nmwcwk=")
         ),
         new PasswordVector(
-            Title: "All fields empty or zero (with one-byte password)",
-            Version: FormatVersion.V3,
-            Password: "a",
-            EncryptionSalt: Convert.FromHexString("0000000000000000"),
-            HMACSalt: Convert.FromHexString("0000000000000000"),
-            IV: Convert.FromHexString("00000000000000000000000000000000"),
-            Plaintext: Convert.FromHexString(""),
-            Ciphertext: Convert.FromHexString("03010000000000000000000000000000000000000000000000000000000000000000B3039BE31CD7ECE5E754F5C8DA17003666313AE8A89DDCF8E3CB41FDC130B2329DBE07D6F4D32C34E050C8BD7E933B12")
+            title: "All fields empty or zero (with one-byte password)",
+            version: FormatVersion.V3,
+            password: "a",
+            encryptionSalt: Convert.FromBase64String("AAAAAAAAAAA="),
+            hmacSalt: Convert.FromBase64String("AAAAAAAAAAA="),
+            iv: Convert.FromBase64String("AAAAAAAAAAAAAAAAAAAAAA=="),
+            plaintext: Convert.FromBase64String(""),
+            ciphertext: Convert.FromBase64String("AwEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALMDm+Mc1+zl51T1yNoXADZmMTroqJ3c+OPLQf3BMLIynb4H1vTTLDTgUMi9fpM7Eg==")
         ),
         new PasswordVector(
-            Title: "One byte",
-            Version: FormatVersion.V3,
-            Password: "thepassword",
-            EncryptionSalt: Convert.FromHexString("0001020304050607"),
-            HMACSalt: Convert.FromHexString("0102030405060708"),
-            IV: Convert.FromHexString("02030405060708090A0B0C0D0E0F0001"),
-            Plaintext: Convert.FromHexString("01"),
-            Ciphertext: Convert.FromHexString("03010001020304050607010203040506070802030405060708090A0B0C0D0E0F0001A1F8730E0BF480EB7B70F690ABF21E029514164AD3C474A51B30C7EAA1CA545B7DE3DE5B010ACBAD0A9A13857DF696A8")
+            title: "One byte",
+            version: FormatVersion.V3,
+            password: "thepassword",
+            encryptionSalt: Convert.FromBase64String("AAECAwQFBgc="),
+            hmacSalt: Convert.FromBase64String("AQIDBAUGBwg="),
+            iv: Convert.FromBase64String("AgMEBQYHCAkKCwwNDg8AAQ=="),
+            plaintext: Convert.FromBase64String("AQ=="),
+            ciphertext: Convert.FromBase64String("AwEAAQIDBAUGBwECAwQFBgcIAgMEBQYHCAkKCwwNDg8AAaH4cw4L9IDre3D2kKvyHgKVFBZK08R0pRswx+qhylRbfePeWwEKy60KmhOFffaWqA==")
         ),
         new PasswordVector(
-            Title: "Exactly one block",
-            Version: FormatVersion.V3,
-            Password: "thepassword",
-            EncryptionSalt: Convert.FromHexString("0102030405060700"),
-            HMACSalt: Convert.FromHexString("0203040506070801"),
-            IV: Convert.FromHexString("030405060708090A0B0C0D0E0F000102"),
-            Plaintext: Convert.FromHexString("0123456789ABCDEF"),
-            Ciphertext: Convert.FromHexString("030101020304050607000203040506070801030405060708090A0B0C0D0E0F0001020E437FE809309C03FD53A475131E9A1978B8EAEF576F60ADB8CE2320849BA32D742900438BA897D22210C76C35C849DF")
+            title: "Exactly one block",
+            version: FormatVersion.V3,
+            password: "thepassword",
+            encryptionSalt: Convert.FromBase64String("AQIDBAUGBwA="),
+            hmacSalt: Convert.FromBase64String("AgMEBQYHCAE="),
+            iv: Convert.FromBase64String("AwQFBgcICQoLDA0ODwABAg=="),
+            plaintext: Convert.FromBase64String("ASNFZ4mrze8="),
+            ciphertext: Convert.FromBase64String("AwEBAgMEBQYHAAIDBAUGBwgBAwQFBgcICQoLDA0ODwABAg5Df+gJMJwD/VOkdRMemhl4uOrvV29grbjOIyCEm6MtdCkAQ4uol9IiEMdsNchJ3w==")
         ),
         new PasswordVector(
-            Title: "More than one block",
-            Version: FormatVersion.V3,
-            Password: "thepassword",
-            EncryptionSalt: Convert.FromHexString("0203040506070001"),
-            HMACSalt: Convert.FromHexString("0304050607080102"),
-            IV: Convert.FromHexString("0405060708090A0B0C0D0E0F00010203"),
-            Plaintext: Convert.FromHexString("0123456789ABCDEF01234567"),
-            Ciphertext: Convert.FromHexString("0301020304050607000103040506070801020405060708090A0B0C0D0E0F00010203E01BBDA5DF2CA8ADACE38F6C588D291E03F951B78D3417BC2816581DC6B767F1A2E57597512B18E1638F21235FA5928C")
+            title: "More than one block",
+            version: FormatVersion.V3,
+            password: "thepassword",
+            encryptionSalt: Convert.FromBase64String("AgMEBQYHAAE="),
+            hmacSalt: Convert.FromBase64String("AwQFBgcIAQI="),
+            iv: Convert.FromBase64String("BAUGBwgJCgsMDQ4PAAECAw=="),
+            plaintext: Convert.FromBase64String("ASNFZ4mrze8BI0Vn"),
+            ciphertext: Convert.FromBase64String("AwECAwQFBgcAAQMEBQYHCAECBAUGBwgJCgsMDQ4PAAECA+AbvaXfLKitrOOPbFiNKR4D+VG3jTQXvCgWWB3Gt2fxouV1l1ErGOFjjyEjX6WSjA==")
         ),
         new PasswordVector(
-            Title: "Multibyte password",
-            Version: FormatVersion.V3,
-            Password: "中文密码",
-            EncryptionSalt: Convert.FromHexString("0304050607000102"),
-            HMACSalt: Convert.FromHexString("0405060708010203"),
-            IV: Convert.FromHexString("05060708090A0B0C0D0E0F0001020304"),
-            Plaintext: Convert.FromHexString("23456789ABCDEF0123456701"),
-            Ciphertext: Convert.FromHexString("03010304050607000102040506070801020305060708090A0B0C0D0E0F00010203048A9E08BDEC1C4BFE13E81FB85F009AB3DDB91387E809C4AD86D9E8A6014557716657BD317D4BB6A7644615B3DE402341")
+            title: "Multibyte password",
+            version: FormatVersion.V3,
+            password: "中文密码",
+            encryptionSalt: Convert.FromBase64String("AwQFBgcAAQI="),
+            hmacSalt: Convert.FromBase64String("BAUGBwgBAgM="),
+            iv: Convert.FromBase64String("BQYHCAkKCwwNDg8AAQIDBA=="),
+            plaintext: Convert.FromBase64String("I0VniavN7wEjRWcB"),
+            ciphertext: Convert.FromBase64String("AwEDBAUGBwABAgQFBgcIAQIDBQYHCAkKCwwNDg8AAQIDBIqeCL3sHEv+E+gfuF8AmrPduROH6AnErYbZ6KYBRVdxZle9MX1LtqdkRhWz3kAjQQ==")
         ),
         new PasswordVector(
-            Title: "Longer text and password",
-            Version: FormatVersion.V3,
-            Password: "It was the best of times, it was the worst of times; it was the age of wisdom, it was the age of foolishness;",
-            EncryptionSalt: Convert.FromHexString("0405060700010203"),
-            HMACSalt: Convert.FromHexString("0506070801020304"),
-            IV: Convert.FromHexString("060708090A0B0C0D0E0F000102030405"),
-            Plaintext: Convert.FromHexString("697420776173207468652065706F6368206F662062656C6965662C20697420776173207468652065706F6368206F6620696E63726564756C6974793B206974207761732074686520736561736F6E206F66204C696768742C206974207761732074686520736561736F6E206F66204461726B6E6573733B206974207761732074686520737072696E67206F6620686F70652C20697420776173207468652077696E746572206F6620646573706169723B207765206861642065766572797468696E67206265666F72652075732C20776520686164206E6F7468696E67206265666F72652075733B207765207765726520616C6C20676F696E67206469726563746C7920746F2048656176656E2C207765207765726520616C6C20676F696E6720746865206F74686572207761792E0A0A"),
-            Ciphertext: Convert.FromHexString("030104050607000102030506070801020304060708090A0B0C0D0E0F000102030405D564C7A99DA921A6E7C4078A82641D95479551283167A2C81F31AB80C9D7D8BEB770111DECD3E3D29BBDF7EBBFC5F10AC87E7E55BFB5A7F487BCD39835705E83B9C049C6D6952BE011F8DDB1A14FC0C925738DE017E62B1D621CCDB75F2937D0A1A70E44D843B9C61037DEE2998B2BBD740B910232EEA71961168838F6995B9964173B34C0BCD311A2C87E271630928BAE301A8F4703AC2AE4699F3C285ABF1C55AC324B073A958AE52EE8C3BD68F919C09EB1CD28142A1996A9E6CBFF5F4F4E1DBA07D29FF66860DB9895A48233140CA249419D63046448DB1B0F4252A6E4EDB947FD0071D1E52BC15600622FA548A6773963618150797A8A80E592446DF5926D0BFD32B544B796F3359567394F77E7B171B2F9BC5F2CAF7A0FAC0DA7D04D6A86744D6E06D02FBE15D0F580A1D5BD16AD91348003611358DCB4AC9990955F6CBBBFB185941D4B4B71CE7F9BA6EFC1270B7808838B6C7B7EF17E8DB919B34FAC")
+            title: "Longer text and password",
+            version: FormatVersion.V3,
+            password: "It was the best of times, it was the worst of times; it was the age of wisdom, it was the age of foolishness;",
+            encryptionSalt: Convert.FromBase64String("BAUGBwABAgM="),
+            hmacSalt: Convert.FromBase64String("BQYHCAECAwQ="),
+            iv: Convert.FromBase64String("BgcICQoLDA0ODwABAgMEBQ=="),
+            plaintext: Convert.FromBase64String("aXQgd2FzIHRoZSBlcG9jaCBvZiBiZWxpZWYsIGl0IHdhcyB0aGUgZXBvY2ggb2YgaW5jcmVkdWxpdHk7IGl0IHdhcyB0aGUgc2Vhc29uIG9mIExpZ2h0LCBpdCB3YXMgdGhlIHNlYXNvbiBvZiBEYXJrbmVzczsgaXQgd2FzIHRoZSBzcHJpbmcgb2YgaG9wZSwgaXQgd2FzIHRoZSB3aW50ZXIgb2YgZGVzcGFpcjsgd2UgaGFkIGV2ZXJ5dGhpbmcgYmVmb3JlIHVzLCB3ZSBoYWQgbm90aGluZyBiZWZvcmUgdXM7IHdlIHdlcmUgYWxsIGdvaW5nIGRpcmVjdGx5IHRvIEhlYXZlbiwgd2Ugd2VyZSBhbGwgZ29pbmcgdGhlIG90aGVyIHdheS4KCg=="),
+            ciphertext: Convert.FromBase64String("AwEEBQYHAAECAwUGBwgBAgMEBgcICQoLDA0ODwABAgMEBdVkx6mdqSGm58QHioJkHZVHlVEoMWeiyB8xq4DJ19i+t3ARHezT49Kbvffrv8XxCsh+flW/taf0h7zTmDVwXoO5wEnG1pUr4BH43bGhT8DJJXON4BfmKx1iHM23Xyk30KGnDkTYQ7nGEDfe4pmLK710C5ECMu6nGWEWiDj2mVuZZBc7NMC80xGiyH4nFjCSi64wGo9HA6wq5GmfPChavxxVrDJLBzqViuUu6MO9aPkZwJ6xzSgUKhmWqebL/19PTh26B9Kf9mhg25iVpIIzFAyiSUGdYwRkSNsbD0JSpuTtuUf9AHHR5SvBVgBiL6VIpnc5Y2GBUHl6ioDlkkRt9ZJtC/0ytUS3lvM1lWc5T3fnsXGy+bxfLK96D6wNp9BNaoZ0TW4G0C++FdD1gKHVvRatkTSAA2ETWNy0rJmQlV9su7+xhZQdS0txzn+bpu/BJwt4CIOLbHt+8X6NuRmzT6w=")
         )
     };
+    }
+    internal class KdfVector
+    {
+        private readonly string _title;
+        private readonly FormatVersion _version;
+        private readonly string _password;
+        private readonly byte[] _salt;
+        private readonly byte[] _key;
+        public KdfVector(string title, FormatVersion version, string password, byte[] salt, byte[] key)
+        {
+            _title = title;
+            _version = version;
+            _password = password;
+            _salt = salt;
+            _key = key;
+        }
+        public string Title => _title;
+        public FormatVersion Version => _version;
+        public string Password => _password;
+        public byte[] Salt => _salt;
+        public byte[] Key => _key;
+    }
+    internal class KeyVector
+    {
+        private readonly string _title;
+        private readonly FormatVersion _version;
+        private readonly byte[] _encryptionKey;
+        private readonly byte[] _hmacKey;
+        private readonly byte[] _iv;
+        private readonly byte[] _plaintext;
+        private readonly byte[] _ciphertext;
+        public KeyVector(string title, FormatVersion version, byte[] encryptionKey, byte[] hmacKey, byte[] iv, byte[] plaintext, byte[] ciphertext)
+        {
+            _title = title;
+            _version = version;
+            _encryptionKey = encryptionKey;
+            _hmacKey = hmacKey;
+            _iv = iv;
+            _plaintext = plaintext;
+            _ciphertext = ciphertext;
+        }
+        public string Title => _title;
+        public FormatVersion Version => _version;
+        public byte[] EncryptionKey => _encryptionKey;
+        public byte[] HMACKey => _hmacKey;
+        public byte[] IV => _iv;
+        public byte[] Plaintext => _plaintext;
+        public byte[] Ciphertext => _ciphertext;
+    }
+    internal class PasswordVector
+    {
+        private readonly string _title;
+        private readonly FormatVersion _version;
+        private readonly string _password;
+        private readonly byte[] _encryptionSalt;
+        private readonly byte[] _hmacSalt;
+        private readonly byte[] _iv;
+        private readonly byte[] _plaintext;
+        private readonly byte[] _ciphertext;
+        public PasswordVector(string title, FormatVersion version, string password, byte[] encryptionSalt, byte[] hmacSalt, byte[] iv, byte[] plaintext, byte[] ciphertext)
+        {
+            _title = title;
+            _version = version;
+            _password = password;
+            _encryptionSalt = encryptionSalt;
+            _hmacSalt = hmacSalt;
+            _iv = iv;
+            _plaintext = plaintext;
+            _ciphertext = ciphertext;
+        }
+        public string Title => _title;
+        public FormatVersion Version => _version;
+        public string Password => _password;
+        public byte[] EncryptionSalt => _encryptionSalt;
+        public byte[] HMACSalt => _hmacSalt;
+        public byte[] IV => _iv;
+        public byte[] Plaintext => _plaintext;
+        public byte[] Ciphertext => _ciphertext;
+    }
 }
-
-
-internal readonly record struct KdfVector(
-    string Title,
-    int Version,
-    byte[] Password,
-    byte[] Salt,
-    byte[] Key
-);
-
-internal readonly record struct KeyVector(
-    string Title,
-    int Version,
-    byte[] EncryptionKey,
-    byte[] HMACKey,
-    byte[] IV,
-    byte[] Plaintext,
-    byte[] Ciphertext
-);
-
-internal readonly record struct PasswordVector(
-    string Title,
-    FormatVersion Version,
-    string Password,
-    byte[] EncryptionSalt,
-    byte[] HMACSalt,
-    byte[] IV,
-    byte[] Plaintext,
-    byte[] Ciphertext
-);
